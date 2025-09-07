@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "artnet": "^1.4.0",
+    "artnet-protocol": "^0.2.1",
+    "log4js": "^6.9.1",
+    "simplex-noise": "^4.0.3"
+  }
+}
