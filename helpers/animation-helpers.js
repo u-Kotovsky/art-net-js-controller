@@ -1,13 +1,7 @@
-// add animation system
-// two key frames
-// loop between them
-// tween
-
-const { lerp, range_to_range, clamp } = require("./math-helpers")
+const { lerp, range_to_range, clamp } = require('./math-helpers')
 
 class KeyFrame {
-    data_reference = '' // a path, or maybe an id of fixture/channel, dunno
-    path = ''
+    path = '' // a patch to update in fixture object
     value = 0
     time = 0
 
@@ -53,6 +47,8 @@ class Animation {
         //zoom: [ { time: 0, value: 0 }, { time: 5, value: 255 }, ]
     }
 
+    // do this after adding all the keyframes you need!!!!
+    // or maybe I should do .addKeyFrame and it'll call apply_keyframes_to_data automatically but will increase load slightly.
     apply_keyframes_to_data() {
         let _data = {}
         for (let i = 0; i < this.keyframes.length; i++) {
@@ -88,8 +84,8 @@ class Animation {
         let names = Object.getOwnPropertyNames(this.data);
         
         // I Should've called previous keyframe and next keyframe, but I fucked up there lol
-        let min_keyframe = null
-        let max_keyframe = null
+        let prev_keyframe = null
+        let next_keyframe = null
 
         // I basically should find closest smallest and bigger keyframe to existing current value of timer
         // so then we can lerp it between those timecodes.
@@ -104,65 +100,28 @@ class Animation {
                 const keyframe = path[j];
 
                 // Null fallbacks
-                if (min_keyframe == null) min_keyframe = keyframe;
-                if (max_keyframe == null) max_keyframe = keyframe;
+                if (prev_keyframe == null) prev_keyframe = keyframe;
+                if (next_keyframe == null) next_keyframe = keyframe;
 
                 // Apply as min keyframe
                 if (keyframe.time <= this.timer) {
-                    if (keyframe.time <= min_keyframe.time) {
-                        min_keyframe = keyframe;
+                    if (keyframe.time <= prev_keyframe.time) {
+                        prev_keyframe = keyframe;
                         // get next keyframe from here
                         if (j < path.length - 1) {
-                            max_keyframe = path[j + 1]
+                            next_keyframe = path[j + 1]
                             break;
                         }
                     }
                 }
-
-                // Apply as max keyframe
-                /*if (max_keyframe == null && keyframe.time > target) {
-                    if (debug) console.log(`${stat} max_keyframe may be applied here time: '${keyframe.time}' `)
-                    if (keyframe.time > max_keyframe.time) {
-                        if (debug) console.log(`${stat} max_keyframe is now time: '${keyframe.time}' `)
-                        max_keyframe = keyframe;
-                    }
-                } else {
-                    if (debug) console.log(`${stat} (max) keyframe is too high '${keyframe.time} < ${target}' `)
-                }*/
-
-                // this.timer == current time that we searching for
-                //if (keyframe.time < min_keyframe.time) 
             }
 
             root[names[i]] = clamp(lerp(
-                min_keyframe.value, 
-                max_keyframe.value, 
-                range_to_range(this.timer, min_keyframe.time, max_keyframe.time, 0, 1)), 0, 255)
-
-            //throw 0
-            /*path.forEach(keyframe => {
-                if (keyframe.time > )
-                console.log(keyframe)
-                throw keyframe;
-            })*/
+                prev_keyframe.value, 
+                next_keyframe.value, 
+                range_to_range(this.timer, prev_keyframe.time, next_keyframe.time, 0, 1)), 0, 255)
         }
     }
 }
-
-
-/*// Ping-pong loop.
-if (this._reverse) {
-    this.dimmer -= 1;
-    if (this.dimmer < 0) {
-        this.dimmer = 1
-        this._reverse = !this._reverse
-    }
-} else {
-    this.dimmer += 1;
-    if (this.dimmer > 255) {
-        this.dimmer = 254
-        this._reverse = !this._reverse
-    }
-}*/
 
 module.exports = { KeyFrame, Animation }
