@@ -12,8 +12,4 @@ function clamp(value, min, max) {
     return value;
 }
 
-//Math.sin(x)
-//Math.cos(x)
-//Math.tan(x)
-
 module.exports = { lerp, range_to_range, clamp }
