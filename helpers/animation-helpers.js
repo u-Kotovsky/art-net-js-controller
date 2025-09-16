@@ -54,7 +54,7 @@ class Animation {
         for (let i = 0; i < this.keyframes.length; i++) {
             let keyframe = this.keyframes[i]
             if (keyframe == null) throw new Error(`keyframe at ${i} is null`)
-            if (_data[keyframe.path] == null) _data[keyframe.path] = []
+            _data[keyframe.path] ??= []
 
             _data[keyframe.path].push({
                 time: keyframe.time,
@@ -99,27 +99,29 @@ class Animation {
             for (let j = path.length - 1; j >= 0; j--) {
                 const keyframe = path[j];
 
-                // Null fallbacks
-                if (prev_keyframe == null) prev_keyframe = keyframe;
-                if (next_keyframe == null) next_keyframe = keyframe;
+                prev_keyframe ??= keyframe; // null fallback
+                next_keyframe ??= keyframe;
 
                 // Apply as min keyframe
-                if (keyframe.time <= this.timer) {
-                    if (keyframe.time <= prev_keyframe.time) {
-                        prev_keyframe = keyframe;
-                        // get next keyframe from here
-                        if (j < path.length - 1) {
-                            next_keyframe = path[j + 1]
-                            break;
-                        }
+                if (keyframe.time <= this.timer
+                    && keyframe.time <= prev_keyframe.time
+                ) {
+                    prev_keyframe = keyframe;
+                    // get next keyframe from here
+                    if (j < path.length - 1) {
+                        next_keyframe = path[j + 1]
+                        break;
                     }
                 }
             }
 
-            root[names[i]] = clamp(lerp(
-                prev_keyframe.value, 
-                next_keyframe.value, 
-                range_to_range(this.timer, prev_keyframe.time, next_keyframe.time, 0, 1)), 0, 255)
+            root[names[i]] = 
+                clamp(
+                    lerp(
+                    prev_keyframe.value, 
+                    next_keyframe.value, 
+                    range_to_range(this.timer, prev_keyframe.time, next_keyframe.time, 0, 1)
+                ), 0, 255)
         }
     }
 }

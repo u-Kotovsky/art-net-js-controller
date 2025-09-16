@@ -1,6 +1,6 @@
-const { Art_Net } = require('./art-net')
 const log4js = require('log4js')
-const { create_data_array, fill_array_random } = require('./helpers/array-helpers')
+const { Art_Net } = require('./art-net')
+const { create_data_array } = require('./helpers/array-helpers')
 const { load_patch_from_file } = require('./helpers/patch-helpers')
 
 let artnet = new Art_Net()
@@ -8,11 +8,12 @@ let logger = log4js.getLogger('Core')
 logger.level = log4js.levels.ALL;
 logger.info('init')
 
+let universes = []
 let data = create_data_array()
 let patch = load_patch_from_file('patches/the-foundry.json')
 logger.info(`patch elements: ${patch.length}`)
 
-function update_patch(deltaTime) {
+const update_patch = (deltaTime) => {
     let nextIndex = 0;
     for (let i = 0; i < patch.length; i++) {
         if (patch[i] == null)  throw new Error(`patch ${i} is null`)
@@ -30,7 +31,7 @@ function update_patch(deltaTime) {
 }
 
 let killswitch = false;
-function update(deltaTime = 1) {
+const update = (deltaTime = 1) => {
     if (killswitch) {
         console.log('KillSwitch!');
         return;

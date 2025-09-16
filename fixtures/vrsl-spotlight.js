@@ -15,10 +15,9 @@ class VRSL_Spotlight {
     animations = []
 
     set_default_channels() {}
-    get_values() {
-        return [this.pan, this.pan_fine, this.tilt, this.tilt_fine, this.zoom, this.dimmer, this.strobe, 
+    get_values = () =>
+        [this.pan, this.pan_fine, this.tilt, this.tilt_fine, this.zoom, this.dimmer, this.strobe, 
             this.red, this.green, this.blue, this.gobo_wheel, this.gobo_index, this.pan_tilt_speed]
-    }
 
     _timer = 0
     _maxTime = 5

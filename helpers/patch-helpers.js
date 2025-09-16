@@ -7,12 +7,10 @@ let logger = log4js.getLogger('Core')
 logger.level = log4js.levels.ALL;
 logger.info('init')
 
-
 function load_patch_from_file(path_to_file) {
-    if (!fs.existsSync(path_to_file)) {
+    if (!fs.existsSync(path_to_file)) 
         throw `File does not exist. '${path_to_file}' Is not correct path to a file.`
-    }
-
+    
     let patch = []
     let data = fs.readFileSync(path_to_file);
     let json = JSON.parse(data)
