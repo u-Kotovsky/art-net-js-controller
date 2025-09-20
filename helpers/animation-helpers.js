@@ -5,6 +5,9 @@ class KeyFrame {
     value = 0
     time = 0
 
+    // todo: curve modifier
+    // maybe it should be something like a weight per keyframe
+
     constructor(path = '', time = 0, value = 0) {
         this.path = path;
         this.time = time;
@@ -51,77 +54,90 @@ class Animation {
     // or maybe I should do .addKeyFrame and it'll call apply_keyframes_to_data automatically but will increase load slightly.
     apply_keyframes_to_data() {
         let _data = {}
-        for (let i = 0; i < this.keyframes.length; i++) {
-            let keyframe = this.keyframes[i]
-            if (keyframe == null) throw new Error(`keyframe at ${i} is null`)
-            _data[keyframe.path] ??= []
 
-            _data[keyframe.path].push({
-                time: keyframe.time,
-                value: keyframe.value
-            })
+        try {
+            for (let i = 0; i < this.keyframes.length; i++) {
+                let keyframe = this.keyframes[i]
+                if (keyframe == null) throw new Error(`keyframe at ${i} is null`)
+                _data[keyframe.path] ??= []
+
+                _data[keyframe.path].push({
+                    time: keyframe.time,
+                    value: keyframe.value
+                })
+            }
+
+            let names =  Object.getOwnPropertyNames(_data);
+            for (let i = 0; i < names.length; i++) { // sort elements by time
+                _data[names[i]] = _data[names[i]].sort(({time:a}, {time:b}) => a-b);//.reverse();
+                //console.log(_data[names[i]].reverse())
+            }
+
+            //_data.reverse()
+
+            this.data = _data;
+            this.set_end_time()
+        } catch (error) {
+            console.error(error)
         }
-
-        let names =  Object.getOwnPropertyNames(_data);
-        for (let i = 0; i < names.length; i++) { // sort elements by time
-            _data[names[i]] = _data[names[i]].sort(({time:a}, {time:b}) => a-b);
-        }
-
-        this.data = _data;
-        this.set_end_time()
     }
 
     update(deltaTime, root) {
         // root - object to update.
         if (!this.active) return;
 
-        this.timer += deltaTime;
-        if (this.timer > this.max_time) {
-            this.active = this.loop;
-            this.timer = 0; // or turn off animation, or reverse it's playback.
-        }
-
-        let names = Object.getOwnPropertyNames(this.data);
-        
-        // I Should've called previous keyframe and next keyframe, but I fucked up there lol
-        let prev_keyframe = null
-        let next_keyframe = null
-
-        // I basically should find closest smallest and bigger keyframe to existing current value of timer
-        // so then we can lerp it between those timecodes.
-
-        // Okay so it fails when there's multiple keyframes at the max or min keyframe 
-        // it searches for global one but needs local based on timer.
-
-        for (let i = 0; i < names.length; i++) {
-            const path = this.data[names[i]]
-
-            for (let j = path.length - 1; j >= 0; j--) {
-                const keyframe = path[j];
-
-                prev_keyframe ??= keyframe; // null fallback
-                next_keyframe ??= keyframe;
-
-                // Apply as min keyframe
-                if (keyframe.time <= this.timer
-                    && keyframe.time <= prev_keyframe.time
-                ) {
-                    prev_keyframe = keyframe;
-                    // get next keyframe from here
-                    if (j < path.length - 1) {
-                        next_keyframe = path[j + 1]
-                        break;
-                    }
-                }
+        try {
+            this.timer += deltaTime;
+            if (this.timer > this.max_time) {
+                this.active = this.loop;
+                if (!this.active) console.log(`animation ended at ${this.timer}`)
+                this.timer = 0; // or turn off animation, or reverse it's playback.
             }
 
-            root[names[i]] = 
-                clamp(
-                    lerp(
-                    prev_keyframe.value, 
-                    next_keyframe.value, 
-                    range_to_range(this.timer, prev_keyframe.time, next_keyframe.time, 0, 1)
-                ), 0, 255)
+            let names = Object.getOwnPropertyNames(this.data);
+            
+            // I Should've called previous keyframe and next keyframe, but I fucked up there lol
+            let prev_keyframe = null
+            let next_keyframe = null
+
+            // I basically should find closest smallest and bigger keyframe to existing current value of timer
+            // so then we can lerp it between those timecodes.
+
+            // Okay so it fails when there's multiple keyframes at the max or min keyframe 
+            // it searches for global one but needs local based on timer.
+
+            for (let i = 0; i < names.length; i++) {
+                const path = this.data[names[i]]
+
+                for (let j = path.length - 1; j >= 0; j--) {
+                    const keyframe = path[j];
+
+                    prev_keyframe ??= keyframe; // null fallback
+                    next_keyframe ??= keyframe;
+
+                    // Apply as min keyframe
+                    if (keyframe.time <= this.timer
+                        && keyframe.time <= prev_keyframe.time
+                    ) {
+                        prev_keyframe = keyframe;
+                        // get next keyframe from here
+                        if (j < path.length - 1) {
+                            next_keyframe = path[j + 1]
+                            break;
+                        }
+                    }
+                }
+
+                root[names[i]] = 
+                    clamp(
+                        lerp(
+                        prev_keyframe.value, 
+                        next_keyframe.value, 
+                        range_to_range(this.timer, prev_keyframe.time, next_keyframe.time, 0, 1)
+                    ), 0, 255)
+                }
+        } catch (error) {
+            console.error(error)
         }
     }
 }

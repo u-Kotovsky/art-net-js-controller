@@ -1,11 +1,47 @@
 const log4js = require('log4js')
 const fs = require('fs')
 const { KeyFrame, Animation } = require('./animation-helpers');
+const { create_data_array } = require('./array-helpers')
 const { VRSL_Spotlight } = require('../fixtures/vrsl-spotlight');
 
 let logger = log4js.getLogger('Core')
 logger.level = log4js.levels.ALL;
 logger.info('init')
+
+class Patch {
+    data = []
+    devices = []
+
+    constructor() {
+        console.log('patch init')
+    }
+
+    load_patch_from_file(path_to_file) {
+        let patch = load_patch_from_file(path_to_file)
+        this.devices.push(patch)
+        this.data.push(create_data_array(512, 0))
+    }
+
+    update_patch(deltaTime, callback) {
+        let nextIndex = 0;
+
+        for (let universe = 0; universe < this.devices.length; universe++) {
+            if (this.devices[universe] == null)  throw new Error(`patch devices ${i} is null`)
+            for (let i = 0; i < this.devices[universe].length; i++) {
+                if (this.devices[universe][i] == null)  throw new Error(`patch universe ${universe} ${i} is null`)
+                this.devices[universe][i].update(deltaTime);
+
+                let values = this.devices[universe][i].get_values()
+                for (let j = 0; j < values.length; j++) { // channels inside a patch
+                    this.data[universe][nextIndex] = values[j]
+                    nextIndex++;
+                }
+            }
+        }
+
+        callback()
+    }
+}
 
 function load_patch_from_file(path_to_file) {
     if (!fs.existsSync(path_to_file)) 
@@ -51,4 +87,6 @@ function load_patch_from_file(path_to_file) {
     return patch
 }
 
-module.exports = { load_patch_from_file }
+var activePatch = new Patch() // program instance
+
+module.exports = { load_patch_from_file, Patch, activePatch }

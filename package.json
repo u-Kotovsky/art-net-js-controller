@@ -2,7 +2,11 @@
   "dependencies": {
     "artnet": "^1.4.0",
     "artnet-protocol": "^0.2.1",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "log4js": "^6.9.1",
-    "simplex-noise": "^4.0.3"
+    "pbkdf2-password": "^1.2.1",
+    "simplex-noise": "^4.0.3",
+    "ws": "^8.18.3"
   }
 }

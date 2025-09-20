@@ -1,0 +1,36 @@
+{
+    "name": "The Foundry",
+    "author": "Kotovsky",
+    "fixtures": [
+        {
+            "type": "spotlight",
+            "repeat": 16,
+            "animations": [
+                {
+                    "loop": true,
+                    "keyframes": [
+                        { "path": "red", "time": 0, "value": 255 },
+                        { "path": "green", "time": 0, "value": 255 },
+                        { "path": "blue", "time": 0, "value": 255 },
+                        { "path": "zoom", "time": 0, "value": 255 },
+                        { "path": "dimmer", "time": 0, "value": 255 },
+
+
+                        { "path": "dimmer", "time": 5, "value": 255 },
+                        { "path": "zoom", "time": 5, "value": 255 },
+
+                        { "path": "dimmer", "time": 8, "value": 255 },
+                        { "path": "zoom", "time": 8, "value": 0 },
+
+
+                        { "path": "red", "time": 10, "value": 255 },
+                        { "path": "green", "time": 10, "value": 0 },
+                        { "path": "blue", "time": 10, "value": 0 },
+                        { "path": "zoom", "time": 10, "value": 255 },
+                        { "path": "dimmer", "time": 10, "value": 255 }
+                    ]
+                }
+            ]
+        }
+    ]
+}
